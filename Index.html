@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMDB — SENA CCYS</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <?!= include('Styles'); ?>
+</head>
+<body>
+
+<div class="app">
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-mark">
+        <img src="data:image/png;base64,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" alt="SENA" style="display:block;">
+      </div>
+      <div>
+        <div class="brand-title">SENA CCYS</div>
+        <div class="brand-subtitle">Gestión CMDB</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span>Activa</span>
+      </div>
+      <button type="button" class="theme-toggle" id="themeToggle" title="Cambiar tema">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="themeIcon">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Scan Card -->
+  <section class="card scan-card">
+    <h2>Escanea la placa del equipo</h2>
+    <p id="scanDesc">Selecciona el método de captura y escanea la placa para consultar el activo.</p>
+
+    <!-- Selector de modo -->
+    <div class="scan-modes" id="scanModes">
+      <button type="button" class="scan-mode active" onclick="switchScanMode('scanner')" id="modeScanner">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
+          <rect x="9" y="9" width="6" height="6"/>
+          <line x1="9" y1="1" x2="9" y2="4"/>
+          <line x1="15" y1="1" x2="15" y2="4"/>
+          <line x1="9" y1="20" x2="9" y2="23"/>
+          <line x1="15" y1="20" x2="15" y2="23"/>
+          <line x1="20" y1="9" x2="23" y2="9"/>
+          <line x1="20" y1="14" x2="23" y2="14"/>
+          <line x1="1" y1="9" x2="4" y2="9"/>
+          <line x1="1" y1="14" x2="4" y2="14"/>
+        </svg>
+        <span>Lector</span>
+      </button>
+      <button type="button" class="scan-mode" onclick="switchScanMode('camera')" id="modeCamera">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <span>Cámara</span>
+      </button>
+    </div>
+
+    <!-- Modo Escáner -->
+    <div id="scannerSection">
+      <div class="input-main">
+        <div class="input-main-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <input type="text" id="scannerInput" placeholder="Esperando lectura del escáner..." autofocus autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Modo Cámara -->
+    <div id="cameraSection" style="display:none;">
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="escanearImagen(event)">
+      <button type="button" class="camera-btn" onclick="document.getElementById('cameraInput').click()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <span>Tomar foto del código de barras</span>
+      </button>
+      <div id="cameraStatus" class="camera-status">Apunta a la placa y toma la foto</div>
+      <div id="reader" style="display:none;"></div>
+    </div>
+
+    <div id="loader" class="loader-box">
+      <div class="spinner"></div>
+      <span>Buscando en la base de datos...</span>
+    </div>
+  </section>
+
+  <!-- Status -->
+  <div id="status" class="status-area"></div>
+
+  <!-- Formulario -->
+  <div id="formContainer" class="form-wrapper">
+    <div class="card">
+      <div class="form-header">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+          Ficha del Equipo
+        </h3>
+        <span id="hojaBadge" class="badge-meta"></span>
+      </div>
+
+      <input type="hidden" id="filaActual">
+      <input type="hidden" id="hojaActual">
+
+      <form id="equipoForm">
+        <div id="dynamicGrid" class="form-grid"></div>
+
+        <div class="form-actions">
+          <div class="btn-save-wrap">
+            <button type="button" id="btnGuardar" class="btn-save" onclick="guardarCambios()">
+              Guardar Actualización
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    CMDB SENA CCYS — Cauca 2026
+  </footer>
+</div>
+
+<script>
+  // Variables inyectadas por Apps Script al evaluar el template
+  const QUERY_PARAMS = <?!= JSON.stringify(queryParams) ?>;
+  const VALIDACIONES_GLOBALES = <?!= JSON.stringify(validaciones) ?>;
+
+  /* ================================================================
+     ICONOS SVG
+     ================================================================ */
+  const ICONS = {
+    chevronDown: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+    check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    sun: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+    moon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
+  };
+
+  /* ================================================================
+     THEME TOGGLE
+     ================================================================ */
+  (function() {
+    const saved = localStorage.getItem('cmdb-theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeIcon(saved);
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('cmdb-theme', next);
+      updateThemeIcon(next);
+    });
+
+    function updateThemeIcon(theme) {
+      document.getElementById('themeIcon').outerHTML = theme === 'dark' ? ICONS.moon : ICONS.sun;
+      document.getElementById('themeToggle').innerHTML = theme === 'dark' ? ICONS.moon : ICONS.sun;
+    }
+  })();
+
+  /* ================================================================
+     CONFIGURACIÓN Y DATOS
+     ================================================================ */
+  const COLUMNAS = [
+    "HOSTNAME", "TIPO", "PROPIETARIO", "MARCA", "MODELO", "SERIAL", "PLACA",
+    "ID SEDE", "NOMBRE DE LA SEDE", "CIUDAD", "UBICACIÓN", "PISO",
+    "NOMBRE DEL USUARIO", "TIPO DE USUARIO", "TIPO DE RED", "PROCESADOR",
+    "TIPO DISCO 1", "TAMAÑO DISCO 1", "TIPO DISCO 2", "TAMAÑO DISCO 2",
+    "TIPO MEMORIA", "TAMAÑO MEMORIA", "TARJETA DE VIDEO", "CAMBIO DE PARTE",
+    "CAMBIO DE PARTE 2", "# DE CASO PARA REPUESTO", "PLACA MONITOR",
+    "PLACA MOUSE", "PLACA TECLADO", "PLACA CARGADOR", "MAC:RED CABLEADA",
+    "MAC RED INALAMBRICA", "SISTEMA OPERATIVO", "VERSION DEL S.O.",
+    "ANTIVIRUS", "OFFICE", "ADOBE", "LAPS", "7ZIP", "VPN", "JAMF",
+    "OTRO SOFTWARE", "ESTADO DEL EQUIPO", "TIENE DOMINIO",
+    "EN QUE DOMINIO SE ENCUENTRA", "CONTRASEÑA BIOS",
+    "FECHA ULTIMO MANTENIMIENTO", "FECHA IMPACTO MAQUINA", "ASS", "Observaciones"
+  ];
+
+  const VALIDACIONES_INDICES = [1, 2, 3, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 20, 21, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 45, 48];
+
+  // Secciones para agrupar visualmente
+  const SECCIONES = {
+    0: 'Información General',
+    7: 'Ubicación',
+    12: 'Usuario',
+    15: 'Hardware',
+    23: 'Mantenimiento',
+    26: 'Periféricos',
+    30: 'Red',
+    32: 'Software',
+    42: 'Estado',
+    45: 'Seguridad',
+    48: 'Asignación'
+  };
+
+  const scannerInput = document.getElementById('scannerInput');
+  const formContainer = document.getElementById('formContainer');
+  const dynamicGrid = document.getElementById('dynamicGrid');
+  const status = document.getElementById('status');
+  const loader = document.getElementById('loader');
+
+  let typingTimer;
+  const doneTypingInterval = 400;
+  let currentValidaciones = {};
+  let esModoNuevo = false;
+
+  /* ================================================================
+     CUSTOM SELECT
+     ================================================================ */
+  function createCustomSelect(index, placeholder) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'custom-select';
+    wrapper.dataset.index = index;
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'select-trigger';
+    trigger.innerHTML = `<span class="select-trigger-text placeholder">${placeholder}</span>${ICONS.chevronDown}`;
+    trigger.setAttribute('aria-haspopup', 'listbox');
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'select-dropdown';
+    dropdown.setAttribute('role', 'listbox');
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(dropdown);
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeAllSelects(wrapper);
+      wrapper.classList.toggle('open');
+    });
+
+    return wrapper;
+  }
+
+  function populateSelect(wrapper, options, selectedValue) {
+    const dropdown = wrapper.querySelector('.select-dropdown');
+    dropdown.innerHTML = '';
+
+    options.forEach(opt => {
+      const item = document.createElement('div');
+      item.className = 'select-option';
+      item.setAttribute('role', 'option');
+      item.dataset.value = opt;
+      item.innerHTML = `${ICONS.check}<span>${opt}</span>`;
+
+      if (opt === selectedValue) item.classList.add('selected');
+
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectOption(wrapper, opt);
+      });
+
+      dropdown.appendChild(item);
+    });
+  }
+
+  function selectOption(wrapper, value) {
+    const triggerText = wrapper.querySelector('.select-trigger-text');
+    triggerText.textContent = value || 'Seleccione...';
+    triggerText.classList.toggle('placeholder', !value);
+
+    wrapper.querySelectorAll('.select-option').forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.value === value);
+    });
+
+    wrapper.classList.remove('open');
+    wrapper.dataset.value = value || '';
+  }
+
+  function closeAllSelects(except) {
+    document.querySelectorAll('.custom-select.open').forEach(el => {
+      if (el !== except) el.classList.remove('open');
+    });
+  }
+
+  document.addEventListener('click', () => closeAllSelects(null));
+
+  /* ================================================================
+     GENERACIÓN DE CAMPOS CON SECCIONES
+     ================================================================ */
+  document.addEventListener('DOMContentLoaded', () => {
+    let lastSection = null;
+
+    COLUMNAS.forEach((nombre, index) => {
+      // Insertar header de sección si cambia
+      if (SECCIONES[index] && SECCIONES[index] !== lastSection) {
+        lastSection = SECCIONES[index];
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'section-header';
+        sectionDiv.innerHTML = `<span>${SECCIONES[index]}</span>`;
+        dynamicGrid.appendChild(sectionDiv);
+      }
+
+      const div = document.createElement('div');
+      div.className = 'field-group';
+      if (nombre === "Observaciones") div.classList.add('full-width');
+
+      const label = document.createElement('label');
+      label.className = 'field-label';
+      label.innerHTML = `<span class="field-num">${index + 1}</span>${nombre}`;
+
+      let input;
+
+      if (VALIDACIONES_INDICES.includes(index) && index !== 6) {
+        input = createCustomSelect(index, 'Seleccione...');
+      } else if (nombre === "Observaciones") {
+        input = document.createElement('textarea');
+        input.rows = 3;
+      } else {
+        input = document.createElement('input');
+        input.type = 'text';
+      }
+
+      input.id = 'col_' + index;
+      if (index === 6) input.readOnly = true;
+
+      div.appendChild(label);
+      div.appendChild(input);
+      dynamicGrid.appendChild(div);
+    });
+
+    // Si venimos desde el script de inventario local con datos precargados
+    if (QUERY_PARAMS && QUERY_PARAMS.placa) {
+      iniciarModoNuevo(QUERY_PARAMS);
+    }
+
+    // Sanitizar en tiempo real: reemplazar apóstrofos por guiones (fallo común de lectores QR)
+    dynamicGrid.addEventListener('input', function(e) {
+      const target = e.target;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        if (target.value.includes("'")) {
+          target.value = target.value.replace(/'/g, '-');
+        }
+      }
+    });
+  });
+
+  /* ================================================================
+     EVENTOS DEL ESCANER
+     ================================================================ */
+  scannerInput.addEventListener('input', function() {
+    clearTimeout(typingTimer);
+    if (scannerInput.value.length > 0) {
+      typingTimer = setTimeout(ejecutarBusqueda, doneTypingInterval);
+    }
+  });
+
+  scannerInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      clearTimeout(typingTimer);
+      ejecutarBusqueda();
+    }
+  });
+
+  function ejecutarBusqueda() {
+    procesarLectura(scannerInput.value);
+  }
+
+  /* ================================================================
+     CAMBIO DE MODO (Escáner / Cámara)
+     ================================================================ */
+  let html5QrCode;
+
+  function switchScanMode(mode) {
+    const scannerSection = document.getElementById('scannerSection');
+    const cameraSection = document.getElementById('cameraSection');
+    const modeScanner = document.getElementById('modeScanner');
+    const modeCamera = document.getElementById('modeCamera');
+    const scanDesc = document.getElementById('scanDesc');
+
+    if (mode === 'scanner') {
+      scannerSection.style.display = 'block';
+      cameraSection.style.display = 'none';
+      modeScanner.classList.add('active');
+      modeCamera.classList.remove('active');
+      scanDesc.textContent = 'Posiciona el cursor en el campo y escanea la placa con el lector.';
+      setTimeout(() => scannerInput.focus(), 100);
+    } else {
+      scannerSection.style.display = 'none';
+      cameraSection.style.display = 'block';
+      modeScanner.classList.remove('active');
+      modeCamera.classList.add('active');
+      scanDesc.textContent = 'Toma una foto clara del código de barras de la placa.';
+      document.getElementById('cameraInput').value = '';
+      document.getElementById('cameraStatus').innerHTML = 'Apunta a la placa y toma la foto';
+    }
+  }
+
+  /* ================================================================
+     ESCANEO CON CÁMARA
+     ================================================================ */
+  function escanearImagen(event) {
+    if (event.target.files.length == 0) return;
+
+    const file = event.target.files[0];
+    const cameraStatus = document.getElementById('cameraStatus');
+    cameraStatus.innerHTML = "Analizando imagen... ⏳";
+
+    if(!html5QrCode) {
+      html5QrCode = new Html5Qrcode("reader");
+    }
+
+    html5QrCode.scanFile(file, true)
+      .then(decodedText => {
+        cameraStatus.innerHTML = "<span style='color: var(--success);'>¡Código detectado: <b>" + decodedText + "</b>! Buscando en BD...</span>";
+        procesarLectura(decodedText);
+      })
+      .catch(err => {
+        cameraStatus.innerHTML = "<span style='color: var(--danger);'>⚠ No se detectó código. Intente tomar la foto más cerca y sin reflejos.</span>";
+      });
+  }
+
+  function procesarLectura(textoEscaneado) {
+    let placaLimpia = textoEscaneado.toString().replace(/'/g, '-').replace(/[^a-zA-Z0-9-]/g, '').toUpperCase();
+    if (placaLimpia.length === 0) return;
+    buscar(placaLimpia);
+  }
+
+  /* ================================================================
+     BÚSQUEDA
+     ================================================================ */
+  function buscar(placa) {
+    loader.style.display = 'flex';
+    status.innerHTML = '';
+    formContainer.style.display = 'none';
+
+    google.script.run
+      .withSuccessHandler(function(resultado) {
+        loader.style.display = 'none';
+        if (resultado) {
+          cargarDatosEnFormulario(resultado);
+          renderAlert('success', 'Equipo encontrado correctamente.');
+        } else {
+          renderAlert('error', `La placa <b>${placa}</b> no se encuentra en la base de datos.`);
+          scannerInput.value = '';
+          scannerInput.focus();
+        }
+      })
+      .withFailureHandler(function(error) {
+        loader.style.display = 'none';
+        renderAlert('error', 'Error de conexión con Google Sheets.');
+      })
+      .buscarEquipo(placa);
+  }
+
+  /* ================================================================
+     CARGAR DATOS
+     ================================================================ */
+  function cargarDatosEnFormulario(resultado) {
+    document.getElementById('hojaBadge').innerText = `${resultado.hoja} · Fila ${resultado.fila}`;
+    document.getElementById('filaActual').value = resultado.fila;
+    document.getElementById('hojaActual').value = resultado.hoja;
+
+    currentValidaciones = resultado.validaciones || {};
+
+    for (let i = 0; i < 50; i++) {
+      const el = document.getElementById('col_' + i);
+      if (!el) continue;
+
+      const valor = resultado.valores[i] || "";
+
+      if (el.classList.contains('custom-select')) {
+        const opciones = currentValidaciones[i] || [];
+        populateSelect(el, opciones, valor);
+        selectOption(el, valor);
+      } else {
+        el.value = valor;
+      }
+    }
+
+    formContainer.style.display = 'block';
+    scannerInput.value = '';
+
+    setTimeout(() => {
+      formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+
+  /* ================================================================
+     UTILIDAD: Fuzzy match para selects
+     ================================================================ */
+  function normalizeOption(str) {
+    return str.toString().toUpperCase().trim().replace(/\s+/g, ' ');
+  }
+
+  function findMatchingOption(valor, opciones) {
+    if (!valor) return null;
+    const normalizedValor = normalizeOption(valor);
+    // 1. Match exacto
+    let match = opciones.find(opt => normalizeOption(opt) === normalizedValor);
+    if (match) return match;
+    // 2. Match sin espacios (ej: "512GB" vs "512 GB")
+    const compactValor = normalizedValor.replace(/\s/g, '');
+    match = opciones.find(opt => normalizeOption(opt).replace(/\s/g, '') === compactValor);
+    if (match) return match;
+    // 3. Match por inclusion (ej: "HDD" en "HDD SATA")
+    match = opciones.find(opt => normalizeOption(opt).includes(normalizedValor) || normalizedValor.includes(normalizeOption(opt)));
+    return match || null;
+  }
+
+  /* ================================================================
+     MODO NUEVO EQUIPO (desde script local)
+     ================================================================ */
+  function iniciarModoNuevo(params) {
+    esModoNuevo = true;
+    loader.style.display = 'none';
+    formContainer.style.display = 'block';
+
+    document.getElementById('scanDesc').innerHTML =
+      `<span style="color:var(--success);font-weight:600;">Modo registro automático.</span> Verificá los datos detectados, completá lo que falta y guardá.`;
+    document.getElementById('hojaBadge').innerText = 'NUEVO EQUIPO';
+
+    // Asegurar que las validaciones globales estén cargadas en los selects
+    currentValidaciones = VALIDACIONES_GLOBALES || {};
+
+    // Defaults para equipos nuevos (segun analisis estadistico del CMDB)
+    const defaultsNuevo = {
+      // Campos que casi siempre son N/A
+      18: 'N/A',  // TIPO DISCO 2       (81.7% N/A)
+      19: 'N/A',  // TAMAÑO DISCO 2     (81.9% N/A)
+      23: 'N/A',  // CAMBIO DE PARTE    (95.0% N/A)
+      24: 'N/A',  // CAMBIO DE PARTE 2  (95.0% N/A)
+      25: 'N/A',  // # DE CASO REPUESTO (95.1% N/A)
+      26: 'N/A',  // PLACA MONITOR      (87.9% N/A)
+      28: 'N/A',  // PLACA TECLADO      (66.0% N/A)
+      44: 'N/A',  // EN QUE DOMINIO     (54.4% N/A)
+      // Campos que casi siempre son SI
+      34: 'SI',   // ANTIVIRUS          (93.0% SI)
+      35: 'SI',   // OFFICE             (93.0% SI)
+      36: 'SI',   // ADOBE              (92.1% SI)
+      38: 'SI'    // 7ZIP               (82.7% SI)
+    };
+
+    const mapeo = {
+      0: params.hostname,
+      3: params.marca,
+      4: params.modelo,
+      5: params.serial,
+      6: params.placa,
+      15: params.procesador,
+      16: params.disco1_tipo,
+      17: params.disco1_tam,
+      18: params.disco2_tipo,
+      19: params.disco2_tam,
+      20: params.tipo_memoria,
+      21: params.ram,
+      22: params.video,
+      30: params.mac_cableada,
+      31: params.mac_wifi,
+      32: params.so,
+      33: params.version_so,
+      46: params.fecha_mantenimiento,
+      47: params.fecha_impacto
+    };
+
+    for (let i = 0; i < 50; i++) {
+      const el = document.getElementById('col_' + i);
+      if (!el) continue;
+
+      // Poblar opciones en selects vacíos para que estén listos
+      if (el.classList.contains('custom-select')) {
+        const opciones = currentValidaciones[i] || [];
+        if (opciones.length > 0 && el.querySelectorAll('.select-option').length === 0) {
+          populateSelect(el, opciones, '');
+        }
+      }
+
+      let valor = '';
+
+      if (mapeo.hasOwnProperty(i)) {
+        valor = (mapeo[i] || '').toString().toUpperCase().trim();
+      }
+
+      // Si no hay valor detectado pero hay default N/A para este campo, usarlo
+      if (!valor && defaultsNuevo.hasOwnProperty(i)) {
+        valor = defaultsNuevo[i];
+      }
+
+      if (valor) {
+        if (el.classList.contains('custom-select')) {
+          const opciones = currentValidaciones[i] || [];
+          const match = findMatchingOption(valor, opciones);
+          if (match) {
+            selectOption(el, match);
+          } else {
+            selectOption(el, '');
+          }
+        } else {
+          el.value = valor;
+        }
+      }
+    }
+
+    // Placa siempre bloqueada en modo nuevo (viene del escaneo físico)
+    const placaEl = document.getElementById('col_6');
+    if (placaEl) placaEl.readOnly = true;
+
+    // Cambiar texto del botón principal
+    const btn = document.getElementById('btnGuardar');
+    if (btn) btn.innerText = 'Registrar Nuevo Equipo';
+
+    setTimeout(() => {
+      formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+
+  /* ================================================================
+     GUARDAR CAMBIOS
+     ================================================================ */
+  function guardarCambios() {
+    const valoresActualizados = [];
+
+    for (let i = 0; i < 50; i++) {
+      const el = document.getElementById('col_' + i);
+      if (!el) {
+        valoresActualizados.push("");
+        continue;
+      }
+
+      let valor;
+      if (el.classList.contains('custom-select')) {
+        valor = el.dataset.value || "";
+      } else {
+        valor = el.value;
+      }
+
+      // Sanitizar: el lector QR a veces escribe apóstrofos en vez de guiones
+      if (typeof valor === 'string') {
+        valor = valor.replace(/'/g, '-');
+      }
+
+      valoresActualizados.push(valor);
+    }
+
+    const btn = document.getElementById('btnGuardar');
+    btn.disabled = true;
+
+    if (esModoNuevo) {
+      // --- REGISTRO DE NUEVO EQUIPO ---
+      // Determinar hoja destino segun el PROPIETARIO elegido (indice 2)
+      const propietario = valoresActualizados[2] || '';
+      const hojaDestino = (propietario === 'TELEFONICA') ? 'EquiposTelefonica' : 'EquiposSena';
+      const datos = {
+        hoja: hojaDestino,
+        valores: valoresActualizados
+      };
+
+      renderAlert('info', 'Registrando nuevo equipo en CMDB...');
+
+      google.script.run
+        .withSuccessHandler(function(respuesta) {
+          btn.disabled = false;
+          if (respuesta && respuesta.exito) {
+            renderAlert('success', respuesta.mensaje);
+            formContainer.style.display = 'none';
+            esModoNuevo = false;
+            btn.innerText = 'Guardar Actualización';
+            scannerInput.focus();
+          } else {
+            renderAlert('error', 'Error al registrar: ' + (respuesta ? respuesta.mensaje : 'Error desconocido'));
+          }
+        })
+        .withFailureHandler(function(error) {
+          btn.disabled = false;
+          renderAlert('error', 'Fallo crítico de conexión: ' + error.message);
+        })
+        .crearEquipo(datos);
+
+    } else {
+      // --- ACTUALIZACIÓN DE EQUIPO EXISTENTE ---
+      const datos = {
+        fila: document.getElementById('filaActual').value,
+        hoja: document.getElementById('hojaActual').value,
+        valores: valoresActualizados
+      };
+
+      renderAlert('info', 'Sincronizando con CMDB, por favor espere...');
+
+      google.script.run
+        .withSuccessHandler(function(respuesta) {
+          btn.disabled = false;
+          if(respuesta && respuesta.exito) {
+            renderAlert('success', respuesta.mensaje);
+            formContainer.style.display = 'none';
+            scannerInput.focus();
+          } else {
+            renderAlert('error', 'Fallo en la base de datos: ' + (respuesta ? respuesta.mensaje : 'Error desconocido'));
+          }
+        })
+        .withFailureHandler(function(error) {
+           btn.disabled = false;
+           renderAlert('error', 'Fallo crítico de conexión: ' + error.message);
+        })
+        .actualizarEquipo(datos);
+    }
+  }
+
+  /* ================================================================
+     ALERTAS
+     ================================================================ */
+  function renderAlert(type, message) {
+    const icons = {
+      success: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+      error: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      info: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`
+    };
+    status.innerHTML = `<div class="alert alert-${type}"><span class="alert-icon">${icons[type]}</span><span>${message}</span></div>`;
+  }
+</script>
+
+</body>
+</html>
