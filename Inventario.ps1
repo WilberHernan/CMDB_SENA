@@ -107,13 +107,14 @@ function Url-Encode {
 }
 
 # ============================================
-# LECTURA DE HARDWARE
+# INICIO
 # ============================================
 Write-Host ""
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  INVENTARIO CMDB - SENA CCYS" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Detectando hardware del equipo..." -ForegroundColor DarkGray
+Write-Host "============================================================" -ForegroundColor DarkGray
+Write-Host "  CMDB SENA CCYS" -ForegroundColor Green
+Write-Host "============================================================" -ForegroundColor DarkGray
+Write-Host ""
+Write-Host "Detectando hardware..." -ForegroundColor DarkGray
 Write-Host ""
 
 $comp   = $null
@@ -132,7 +133,7 @@ try { $vid  = Get-WmiObject Win32_VideoController -ErrorAction Stop | Select-Obj
 
 # DETECCION DE DISCOS
 Write-Host ""
-Write-Host "Detectando discos..." -ForegroundColor DarkGray
+Write-Host "-- Almacenamiento ------------------------------------------" -ForegroundColor DarkGray
 
 $disk1_tipo = ""
 $disk1_tam = ""
@@ -175,7 +176,7 @@ try {
                 $disk2_tam = $tam
             }
             $diskCount++
-            Write-Host "  [OK] Disco $idx`: $tipo / $tam (Modelo: $model)" -ForegroundColor DarkGray
+            Write-Host "  + Disco $idx`: $tipo / $tam" -ForegroundColor Green
         }
     }
 } catch {}
@@ -195,17 +196,20 @@ if ($diskCount -eq 0) {
             $disk1_tipo = "HDD"
             $disk1_tam = $tam
             $diskCount = 1
-            Write-Host "  [OK] Disco C: detectado por emergencia: HDD / $tam" -ForegroundColor DarkGray
+            Write-Host "  + Disco C: HDD / $tam (emergencia)" -ForegroundColor Yellow
         }
     } catch {}
 }
 
 # DETECCION DE RED
+Write-Host ""
+Write-Host "-- Red -----------------------------------------------------" -ForegroundColor DarkGray
 try {
     $net = Get-NetAdapter -ErrorAction Stop | Where-Object { $_.Status -eq 'Up' -or $_.HardwareInterface -eq $true }
     $macEth  = Format-MacAddress (($net | Where-Object { $_.PhysicalMediaType -eq '802.3' -or $_.Name -match 'Ethernet' } | Select-Object -First 1).MacAddress)
     $macWifi = Format-MacAddress (($net | Where-Object { $_.PhysicalMediaType -match '802.11' -or $_.Name -match 'Wi-?Fi|Wireless' } | Select-Object -First 1).MacAddress)
-    Write-Host "  [OK] MAC Cableada: $macEth | MAC WiFi: $macWifi" -ForegroundColor DarkGray
+    if ($macEth)  { Write-Host "  + MAC Cableada: $macEth" -ForegroundColor Green }
+    if ($macWifi) { Write-Host "  + MAC WiFi: $macWifi" -ForegroundColor Green }
 } catch {
     try {
         $wmiNet = Get-WmiObject Win32_NetworkAdapterConfiguration -ErrorAction Stop | Where-Object { $_.IPEnabled -eq $true }
@@ -214,7 +218,8 @@ try {
             if (-not $macEth -and $adapter.DefaultIPGateway) { $macEth = $mac }
             elseif (-not $macWifi) { $macWifi = $mac }
         }
-        Write-Host "  [OK] MAC detectada via WMI: $macEth / $macWifi" -ForegroundColor DarkGray
+        if ($macEth)  { Write-Host "  + MAC Cableada: $macEth (WMI)" -ForegroundColor Green }
+        if ($macWifi) { Write-Host "  + MAC WiFi: $macWifi (WMI)" -ForegroundColor Green }
     } catch {}
 }
 
@@ -248,15 +253,43 @@ $params.disco2_tipo = $disk2_tipo
 $params.disco2_tam  = Normalize-DiskSize -Raw $disk2_tam
 
 # ============================================
-# ENTRADA DE PLACA
+# PREVIEW DE DATOS
 # ============================================
 Write-Host ""
-Write-Host "Escanea la placa SENA del equipo y presiona ENTER: " -ForegroundColor Yellow -NoNewline
+Write-Host "------------------------------------------------------------" -ForegroundColor DarkGray
+Write-Host ""
+Write-Host "Datos detectados:" -ForegroundColor Green
+Write-Host ""
+Write-Host "  Hostname:     $($params.hostname)" -ForegroundColor White
+Write-Host "  Marca:        $($params.marca)" -ForegroundColor White
+Write-Host "  Modelo:       $($params.modelo)" -ForegroundColor White
+Write-Host "  Serial:       $($params.serial)" -ForegroundColor White
+Write-Host "  CPU:          $($params.procesador)" -ForegroundColor White
+Write-Host "  RAM:          $($params.ram)" -ForegroundColor White
+Write-Host "  Memoria:      $($params.tipo_memoria)" -ForegroundColor White
+Write-Host "  Disco 1:      $($params.disco1_tipo) / $($params.disco1_tam)" -ForegroundColor White
+if ($diskCount -gt 1) {
+    Write-Host "  Disco 2:      $($params.disco2_tipo) / $($params.disco2_tam)" -ForegroundColor White
+}
+Write-Host "  Video:        $($params.video)" -ForegroundColor White
+Write-Host "  S.O.:         $($params.so) $($params.version_so)" -ForegroundColor White
+Write-Host "  MAC Eth:      $($params.mac_cableada)" -ForegroundColor White
+Write-Host "  MAC WiFi:     $($params.mac_wifi)" -ForegroundColor White
+Write-Host ""
+
+# ============================================
+# ENTRADA DE PLACA
+# ============================================
+Write-Host "------------------------------------------------------------" -ForegroundColor DarkGray
+Write-Host ""
+Write-Host "Escribe o escanea la placa y presiona ENTER: " -ForegroundColor White -NoNewline
 $placaInput = Read-Host
 $placaInput = $placaInput.Trim().ToUpper() -replace "[^A-Z0-9\-]", ""
 
 if (-not $placaInput) {
-    Write-Host "ERROR: La placa es obligatoria. Proceso cancelado." -ForegroundColor Red
+    Write-Host ""
+    Write-Host "La placa es obligatoria. Proceso cancelado." -ForegroundColor Red
+    Write-Host ""
     Write-Host "Presiona cualquier tecla para cerrar..." -ForegroundColor DarkGray
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit 1
@@ -264,26 +297,11 @@ if (-not $placaInput) {
 $params.placa = $placaInput
 
 # ============================================
-# PREVIEW DE DATOS
-# ============================================
-Write-Host ""
-Write-Host "Datos detectados:" -ForegroundColor Green
-Write-Host "  Placa:        $($params.placa)"
-Write-Host "  Hostname:     $($params.hostname)"
-Write-Host "  Marca/Modelo: $($params.marca) / $($params.modelo)"
-Write-Host "  Serial:       $($params.serial)"
-Write-Host "  CPU:          $($params.procesador)"
-Write-Host "  RAM:          $($params.ram)"
-Write-Host "  Disco 1:      $($params.disco1_tipo) / $($params.disco1_tam)"
-if ($diskCount -gt 1) {
-    Write-Host "  Disco 2:      $($params.disco2_tipo) / $($params.disco2_tam)"
-}
-Write-Host "  SO:           $($params.so) $($params.version_so)"
-Write-Host ""
-
-# ============================================
 # CONSTRUIR URL Y ABRIR NAVEGADOR
 # ============================================
+Write-Host "------------------------------------------------------------" -ForegroundColor DarkGray
+Write-Host ""
+
 $qsParts = @()
 foreach ($kv in $params.GetEnumerator()) {
     $encoded = Url-Encode -Value $kv.Value
@@ -291,16 +309,21 @@ foreach ($kv in $params.GetEnumerator()) {
 }
 $finalUrl = "$CMDB_URL`?$($qsParts -join '&')"
 
-Write-Host "Abriendo CMDB en el navegador..." -ForegroundColor Green
+Write-Host "Abriendo CMDB..." -ForegroundColor Green
+Write-Host ""
 try {
     Start-Process $finalUrl
+    Write-Host "Navegador abierto." -ForegroundColor Green
 } catch {
-    Write-Host "ERROR al abrir el navegador: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "Copia la URL de abajo manualmente:" -ForegroundColor Yellow
+    Write-Host "No se pudo abrir el navegador." -ForegroundColor Red
+    Write-Host "Copia esta URL:" -ForegroundColor Yellow
     Write-Host $finalUrl -ForegroundColor Yellow
 }
 
 Write-Host ""
-Write-Host "Listo. Completa los datos faltantes en la pagina y guarda." -ForegroundColor Cyan
-Write-Host "Presiona cualquier tecla para cerrar esta ventana..." -ForegroundColor DarkGray
+Write-Host "------------------------------------------------------------" -ForegroundColor DarkGray
+Write-Host ""
+Write-Host "Completa los datos faltantes en la pagina y guarda." -ForegroundColor Gray
+Write-Host ""
+Write-Host "Presiona cualquier tecla para cerrar..." -ForegroundColor DarkGray
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
