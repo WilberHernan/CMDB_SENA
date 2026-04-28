@@ -193,7 +193,11 @@ function actualizarEquipo(datos) {
       sheet.insertColumnsAfter(sheet.getMaxColumns(), cantidadDatos - sheet.getMaxColumns());
     }
 
-    sheet.getRange(fila, 1, 1, cantidadDatos).setValues([valoresLimpios]);
+    const rangoActualizar = sheet.getRange(fila, 1, 1, cantidadDatos);
+    rangoActualizar.setValues([valoresLimpios]);
+
+    // Pintar fila actualizada de verde pálido sutil
+    rangoActualizar.setBackground('#dcfce7');
 
     return { exito: true, mensaje: "¡CMDB Actualizada con éxito!" };
 
@@ -240,6 +244,12 @@ function crearEquipo(datos) {
     }
 
     sheet.appendRow(valoresLimpios);
+
+    // Pintar fila nueva de azul pálido sutil
+    const ultimaFila = sheet.getLastRow();
+    const rangoNuevo = sheet.getRange(ultimaFila, 1, 1, cantidadDatos);
+    rangoNuevo.setBackground('#dbeafe');
+
     return { exito: true, mensaje: 'Equipo registrado exitosamente en ' + hojaNombre };
 
   } catch (e) {
