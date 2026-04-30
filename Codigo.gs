@@ -194,6 +194,12 @@ function actualizarEquipo(datos) {
     }
 
     const rangoActualizar = sheet.getRange(fila, 1, 1, cantidadDatos);
+
+    // Eliminar validaciones de datos heredadas del Excel antes de escribir.
+    // El frontend ya controla los dropdowns; las validaciones nativas de Sheets
+    // solo causan errores si el valor no coincide exactamente con su lista.
+    rangoActualizar.setDataValidation(null);
+
     rangoActualizar.setValues([valoresLimpios]);
 
     // Pintar fila actualizada de verde pálido sutil

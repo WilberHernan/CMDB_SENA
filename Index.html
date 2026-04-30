@@ -21,6 +21,9 @@
   <div class="glow-orb glow-orb-green"></div>
   <div class="glow-orb glow-orb-blue"></div>
 
+  <!-- Sticky sentinel -->
+  <div id="headerSentinel" style="position:absolute;top:0;height:1px;visibility:hidden;pointer-events:none;"></div>
+
   <!-- Header -->
   <header class="header glass glass-hover">
     <div class="brand">
@@ -81,8 +84,7 @@
           <span>Tomar foto del código de barras</span>
         </button>
       </div>
-      <div id="cameraStatus" class="camera-status">Apunta a la placa y toma la foto</div>
-      <div id="reader" style="display:none;"></div>
+      <div id="cameraStatus" class="camera-status">Apunta a la placa, toca el botón y saca la foto</div>
     </div>
 
     <div id="loader" class="loader-box">
@@ -156,6 +158,20 @@
       localStorage.setItem('cmdb-theme', next);
       updateThemeIcon(next);
     });
+  })();
+
+  /* ================================================================
+     HEADER STICKY OBSERVER
+     ================================================================ */
+  (function() {
+    const header = document.querySelector('.header');
+    const sentinel = document.getElementById('headerSentinel');
+    if (!header || !sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => header.classList.toggle('is-stuck', !entry.isIntersecting),
+      { threshold: [1] }
+    );
+    observer.observe(sentinel);
   })();
 
   /* ================================================================
@@ -377,8 +393,6 @@
   /* ================================================================
      CAMBIO DE MODO (Escáner / Cámara)
      ================================================================ */
-  let html5QrCode;
-
   function switchScanMode(mode) {
     const scannerSection = document.getElementById('scannerSection');
     const cameraSection = document.getElementById('cameraSection');
@@ -398,15 +412,17 @@
       cameraSection.style.display = 'block';
       modeScanner.classList.remove('active');
       modeCamera.classList.add('active');
-      scanDesc.textContent = 'Toma una foto clara del código de barras de la placa.';
+      scanDesc.textContent = 'Apunta a la placa, toca el botón y saca la foto.';
       document.getElementById('cameraInput').value = '';
-      document.getElementById('cameraStatus').innerHTML = 'Apunta a la placa y toma la foto';
+      document.getElementById('cameraStatus').innerHTML = 'Apunta a la placa, toca el botón y saca la foto';
     }
   }
 
   /* ================================================================
      ESCANEO CON CÁMARA
      ================================================================ */
+  let html5QrCode;
+
   function escanearImagen(event) {
     if (event.target.files.length == 0) return;
 
@@ -449,9 +465,7 @@
           cargarDatosEnFormulario(resultado);
           renderAlert('success', 'Equipo encontrado correctamente.');
         } else {
-          renderAlert('error', `La placa <b>${placa}</b> no se encuentra en la base de datos.`);
-          scannerInput.value = '';
-          scannerInput.focus();
+          renderNotFound(placa);
         }
       })
       .withFailureHandler(function(error) {
@@ -695,6 +709,64 @@
         })
         .actualizarEquipo(datos);
     }
+  }
+
+  /* ================================================================
+     EMPTY STATE — Equipo no encontrado
+     ================================================================ */
+  function renderNotFound(placa) {
+    scannerInput.value = '';
+
+    const searchIcon = LUCIDE.search;
+    const plusIcon = LUCIDE.plus;
+    const helpIcon = LUCIDE.helpCircle;
+
+    status.innerHTML = `
+      <div class="empty-state-card">
+        <div class="empty-state-visual">
+          <div class="empty-state-icon-wrap">
+            <div class="empty-state-icon-inner">
+              ${searchIcon}
+            </div>
+            <div class="empty-state-badge">${helpIcon}</div>
+          </div>
+        </div>
+        <h2 class="empty-state-title">Equipo no encontrado</h2>
+        <p class="empty-state-desc">
+          La placa <span class="empty-state-placa">${placa}</span> no existe en la base de datos.<br>
+          Verificá que esté bien escaneada o registrá el equipo como nuevo.
+        </p>
+        <div class="empty-state-actions">
+          <button type="button" class="empty-state-btn" id="btnReintentar">
+            ${searchIcon}
+            Escanear otra placa
+          </button>
+          <button type="button" class="empty-state-btn empty-state-btn-primary" id="btnRegistrarNuevo">
+            ${plusIcon}
+            Registrar nuevo
+          </button>
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      const btnReintentar = document.getElementById('btnReintentar');
+      const btnRegistrar = document.getElementById('btnRegistrarNuevo');
+
+      if (btnReintentar) {
+        btnReintentar.addEventListener('click', () => {
+          status.innerHTML = '';
+          scannerInput.focus();
+        });
+      }
+
+      if (btnRegistrar) {
+        btnRegistrar.addEventListener('click', () => {
+          status.innerHTML = '';
+          iniciarModoNuevo({ placa: placa });
+        });
+      }
+    }, 0);
   }
 
   /* ================================================================
