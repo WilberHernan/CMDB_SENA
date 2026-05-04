@@ -134,6 +134,7 @@
   // Variables inyectadas por Apps Script al evaluar el template
   const QUERY_PARAMS = <?!= JSON.stringify(queryParams) ?>;
   const VALIDACIONES_GLOBALES = <?!= JSON.stringify(validaciones) ?>;
+  const VALIDACIONES_INDICES = <?!= JSON.stringify(validacionesIndices) ?>;
   const MAPEO_SEDE_ID = <?!= JSON.stringify(mapeoSedeId) ?>;
 
   /* ================================================================
@@ -192,8 +193,6 @@
     "EN QUE DOMINIO SE ENCUENTRA", "CONTRASEÑA BIOS",
     "FECHA ULTIMO MANTENIMIENTO", "FECHA IMPACTO MAQUINA", "ASS", "Observaciones"
   ];
-
-  const VALIDACIONES_INDICES = [1, 2, 3, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 20, 21, 32, 33, 34, 35, 36, 37, 38, 39, 40, 42, 43, 44, 45, 48];
 
   const SECCIONES = {
     0: 'Información General',

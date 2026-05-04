@@ -1,10 +1,66 @@
 const SPREADSHEET_ID = '1yGpolZYSmeIgjFeDOuN2C-cd2h-ipouZXx-PCZrVrmw';
 const HOJAS_EQUIPOS = ['EquiposSena', 'EquiposTelefonica'];
 
+/* ================================================================
+   CONFIGURACION ROBUSTA: Mapeo de campos del formulario principal
+   ================================================================ */
+const FORM_FIELDS = {
+  "HOSTNAME": 0, "TIPO": 1, "PROPIETARIO": 2, "MARCA": 3, "MODELO": 4,
+  "SERIAL": 5, "PLACA": 6, "ID SEDE": 7, "NOMBRE DE LA SEDE": 8,
+  "CIUDAD": 9, "UBICACIÓN": 10, "PISO": 11, "NOMBRE DEL USUARIO": 12,
+  "TIPO DE USUARIO": 13, "TIPO DE RED": 14, "PROCESADOR": 15,
+  "TIPO DISCO 1": 16, "TAMAÑO DISCO 1": 17, "TIPO DISCO 2": 18,
+  "TAMAÑO DISCO 2": 19, "TIPO MEMORIA": 20, "TAMAÑO MEMORIA": 21,
+  "TARJETA DE VIDEO": 22, "CAMBIO DE PARTE": 23, "CAMBIO DE PARTE 2": 24,
+  "# DE CASO PARA REPUESTO": 25, "PLACA MONITOR": 26, "PLACA MOUSE": 27,
+  "PLACA TECLADO": 28, "PLACA CARGADOR": 29, "MAC:RED CABLEADA": 30,
+  "MAC RED INALAMBRICA": 31, "SISTEMA OPERATIVO": 32, "VERSION DEL S.O.": 33,
+  "ANTIVIRUS": 34, "OFFICE": 35, "ADOBE": 36, "LAPS": 37, "7ZIP": 38,
+  "VPN": 39, "JAMF": 40, "OTRO SOFTWARE": 41, "ESTADO DEL EQUIPO": 42,
+  "TIENE DOMINIO": 43, "EN QUE DOMINIO SE ENCUENTRA": 44,
+  "CONTRASEÑA BIOS": 45, "FECHA ULTIMO MANTENIMIENTO": 46,
+  "FECHA IMPACTO MAQUINA": 47, "ASS": 48, "Observaciones": 49
+};
+
+const HEADER_ALIASES = {
+  "EN": "TIPO DE USUARIO",
+  "EN ": "TIPO DE USUARIO",
+  "TIPO USUARIO": "TIPO DE USUARIO",
+  "USUARIO": "TIPO DE USUARIO",
+  "ID": "ID SEDE",
+  "NUMERO SEDE": "ID SEDE",
+  "NOMBRE SEDE": "NOMBRE DE LA SEDE",
+  "SEDE": "NOMBRE DE LA SEDE",
+  "UBICACION": "UBICACIÓN",
+  "VERSION SO": "VERSION DEL S.O.",
+  "VERSION S.O.": "VERSION DEL S.O.",
+  "VERSION SISTEMA OPERATIVO": "VERSION DEL S.O.",
+  "SO VERSION": "VERSION DEL S.O.",
+  "ESTADO": "ESTADO DEL EQUIPO",
+  "ESTADO EQUIPO": "ESTADO DEL EQUIPO",
+  "DOMINIO": "EN QUE DOMINIO SE ENCUENTRA",
+  "CONTRASENA BIOS": "CONTRASEÑA BIOS",
+  "PASSWORD BIOS": "CONTRASEÑA BIOS",
+  "FECHA MANTENIMIENTO": "FECHA ULTIMO MANTENIMIENTO",
+  "FECHA IMPACTO": "FECHA IMPACTO MAQUINA",
+  "OBSERVACIONES": "Observaciones"
+};
+
+const HARDCODED_VALIDATIONS = {
+  35: ["SI", "NO", "N/A"],
+  36: ["SI", "NO", "N/A"],
+  37: ["SI", "NO", "N/A"],
+  38: ["SI", "NO", "N/A"],
+  39: ["SI", "NO", "N/A"],
+  40: ["SI", "NO", "N/A"],
+  45: ["SI", "NO", "N/A"]
+};
+
 function doGet(e) {
   const template = HtmlService.createTemplateFromFile('Index');
   template.queryParams = e.parameter || {};
   template.validaciones = obtenerValidacionesManuales();
+  template.validacionesIndices = obtenerValidacionesIndices();
   template.mapeoSedeId = obtenerMapeoSedeId();
   return template.evaluate()
     .setTitle('CMDB SENA CCYS')
@@ -14,7 +70,8 @@ function doGet(e) {
 
 /**
  * Obtiene el mapeo bidireccional Sede ↔ ID desde la Hoja3.
- * La Hoja3 tiene las columnas 6 (ID numérico) y 7 (nombre sede) invertidas respecto a sus headers.
+ * Auto-descubre qué columna contiene IDs numéricos y cuál nombres de sede
+ * analizando el tipo de contenido, sin depender de la posición ni el header.
  */
 function obtenerMapeoSedeId() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -24,13 +81,54 @@ function obtenerMapeoSedeId() {
   const data = sheet.getDataRange().getDisplayValues();
   if (data.length < 2) return { sedeAId: {}, idASede: {} };
 
+  // Auto-descubrir columnas por tipo de contenido
+  let idCandidates = [];
+  let sedeCandidates = [];
+
+  for (let c = 0; c < data[0].length && c < 20; c++) {
+    let numericValues = [];
+    let textValues = [];
+
+    for (let r = 1; r < Math.min(data.length, 25); r++) {
+      const val = data[r][c];
+      if (!val || val.toString().trim() === '') continue;
+      const str = val.toString().trim();
+      if (/^\d+$/.test(str)) numericValues.push(str);
+      else textValues.push(str);
+    }
+
+    // Candidato ID: mayoría numérica, todos de 2+ dígitos
+    if (numericValues.length >= 2 && textValues.length === 0) {
+      const allMultiDigit = numericValues.every(function(v) { return v.length >= 2; });
+      if (allMultiDigit) {
+        idCandidates.push({ col: c, count: numericValues.length });
+      }
+    }
+
+    // Candidato Sede: mayoría texto, longitud promedio > 3
+    if (textValues.length >= 2 && numericValues.length === 0) {
+      const avgLen = textValues.reduce(function(s, v) { return s + v.length; }, 0) / textValues.length;
+      if (avgLen > 3) {
+        sedeCandidates.push({ col: c, count: textValues.length });
+      }
+    }
+  }
+
+  // Elegir el candidato con más valores
+  idCandidates.sort(function(a, b) { return b.count - a.count; });
+  sedeCandidates.sort(function(a, b) { return b.count - a.count; });
+
+  const colId = idCandidates.length > 0 ? idCandidates[0].col : 6;
+  const colSede = sedeCandidates.length > 0 ? sedeCandidates[0].col : 7;
+
+  Logger.log('🔍 Mapeo Sede-ID detectado: col ID=' + colId + ', col Sede=' + colSede);
+
   const sedeAId = {};
   const idASede = {};
 
   for (let i = 1; i < data.length; i++) {
-    // En Hoja3: col 6 tiene los IDs numéricos, col 7 tiene los nombres de sede
-    const idRaw = data[i][6];
-    const sedeRaw = data[i][7];
+    const idRaw = data[i][colId];
+    const sedeRaw = data[i][colSede];
 
     if (idRaw && sedeRaw) {
       const id = idRaw.toString().trim();
@@ -50,9 +148,49 @@ function include(filename) {
 }
 
 /**
+ * Normaliza un header para matching (mayúsculas, sin caracteres especiales, espacios unificados)
+ */
+function normalizarHeader(header) {
+  return header.toString().toUpperCase()
+    .replace(/[^A-Z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Intenta matchear un header de Hoja3 con un campo del formulario principal.
+ * Usa aliases conocidos, matching exacto y matching parcial.
+ */
+function matchHeaderConFormField(hoja3Header) {
+  const hNorm = normalizarHeader(hoja3Header);
+
+  // 1. Alias directo
+  if (HEADER_ALIASES[hNorm]) {
+    return HEADER_ALIASES[hNorm];
+  }
+
+  // 2. Matching exacto contra FORM_FIELDS
+  for (const formName of Object.keys(FORM_FIELDS)) {
+    if (normalizarHeader(formName) === hNorm) {
+      return formName;
+    }
+  }
+
+  // 3. Matching parcial (uno contiene al otro)
+  for (const formName of Object.keys(FORM_FIELDS)) {
+    const fNorm = normalizarHeader(formName);
+    if (fNorm.includes(hNorm) || hNorm.includes(fNorm)) {
+      return formName;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Lee las validaciones dinámicamente desde la hoja 'Hoja3'.
- * Cada columna de Hoja3 contiene los valores posibles para cada dropdown.
- * Los valores vacíos se ignoran automáticamente.
+ * Auto-descubre el mapeo de columnas leyendo los headers y matcheándolos
+ * con los campos del formulario principal. No depende de índices hardcodeados.
  */
 function obtenerValidacionesManuales() {
   const resultado = {};
@@ -60,7 +198,6 @@ function obtenerValidacionesManuales() {
   const sheet = ss.getSheetByName('Hoja3');
 
   if (!sheet) {
-    // Fallback si no existe Hoja3
     Logger.log('⚠️ No se encontró Hoja3, usando validaciones por defecto');
     return obtenerValidacionesPorDefecto();
   }
@@ -68,38 +205,33 @@ function obtenerValidacionesManuales() {
   const data = sheet.getDataRange().getDisplayValues();
   if (data.length < 2) return resultado;
 
-  // Mapeo: columna en Hoja3 → índice en el formulario principal
-  // Nota: columna 12 en Hoja3 tiene header "en " pero son los TIPOS DE USUARIO
-  const mapeo = {
-    1:  1,   // TIPO
-    2:  2,   // PROPIETARIO
-    3:  3,   // MARCA
-    6:  7,   // ID → ID SEDE
-    7:  8,   // NOMBRE DE LA SEDE
-    8:  9,   // CIUDAD
-    9:  10,  // UBICACIÓN
-    10: 11,  // PISO
-    12: 13,  // en  → TIPO DE USUARIO
-    13: 14,  // TIPO DE RED
-    15: 16,  // TIPO DISCO 1
-    16: 17,  // TAMAÑO DISCO 1
-    17: 18,  // TIPO DISCO 2
-    18: 19,  // TAMAÑO DISCO 2
-    19: 20,  // TIPO MEMORIA
-    20: 21,  // TAMAÑO MEMORIA
-    28: 32,  // SISTEMA OPERATIVO
-    29: 33,  // VERSION DEL S.O.
-    30: 34,  // ANTIVIRUS
-    31: 42,  // ESTADO DEL EQUIPO
-    32: 43,  // TIENE DOMINIO
-    33: 44,  // EN QUE DOMINIO SE ENCUENTRA
-    37: 48   // ASS
-  };
+  const headers = data[0];
+  const mapeoDetectado = {};
+  const noMatcheados = [];
 
-  // Extraer valores únicos por columna (ignorando vacíos)
-  Object.keys(mapeo).forEach(function(colHoja3Str) {
+  // Descubrir mapeo leyendo headers
+  for (let c = 0; c < headers.length; c++) {
+    const hRaw = headers[c];
+    if (!hRaw) continue;
+
+    const formField = matchHeaderConFormField(hRaw);
+    if (formField && FORM_FIELDS[formField] !== undefined) {
+      mapeoDetectado[c] = FORM_FIELDS[formField];
+    } else {
+      noMatcheados.push(hRaw);
+    }
+  }
+
+  if (noMatcheados.length > 0) {
+    Logger.log('⚠️ Headers de Hoja3 no matcheados: ' + noMatcheados.join(', '));
+  }
+
+  Logger.log('🔍 Mapeo Hoja3 detectado: ' + JSON.stringify(mapeoDetectado));
+
+  // Extraer valores únicos por columna mapeada
+  Object.keys(mapeoDetectado).forEach(function(colHoja3Str) {
     const colHoja3 = parseInt(colHoja3Str);
-    const indiceForm = mapeo[colHoja3];
+    const indiceForm = mapeoDetectado[colHoja3];
     const valoresUnicos = [];
     const visto = {};
 
@@ -119,15 +251,20 @@ function obtenerValidacionesManuales() {
   });
 
   // Validaciones manuales para campos que NO están en Hoja3
-  resultado[35] = ["SI", "NO", "N/A"]; // OFFICE
-  resultado[36] = ["SI", "NO", "N/A"]; // ADOBE
-  resultado[37] = ["SI", "NO", "N/A"]; // LAPS
-  resultado[38] = ["SI", "NO", "N/A"]; // 7ZIP
-  resultado[39] = ["SI", "NO", "N/A"]; // VPN
-  resultado[40] = ["SI", "NO", "N/A"]; // JAMF
-  resultado[45] = ["SI", "NO", "N/A"]; // CONTRASEÑA BIOS
+  Object.keys(HARDCODED_VALIDATIONS).forEach(function(idx) {
+    resultado[parseInt(idx)] = HARDCODED_VALIDATIONS[idx];
+  });
 
   return resultado;
+}
+
+/**
+ * Devuelve el array de índices que deben renderizarse como dropdowns en el frontend.
+ * Se genera dinámicamente a partir de las validaciones activas.
+ */
+function obtenerValidacionesIndices() {
+  const validaciones = obtenerValidacionesManuales();
+  return Object.keys(validaciones).map(Number).sort(function(a, b) { return a - b; });
 }
 
 /**
@@ -187,6 +324,7 @@ function buscarEquipo(placaEscaneada) {
 
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const validacionesGlobales = obtenerValidacionesManuales();
+  const validacionesIdx = obtenerValidacionesIndices();
   const mapeoSedeId = obtenerMapeoSedeId();
 
   for (let h = 0; h < HOJAS_EQUIPOS.length; h++) {
@@ -204,6 +342,7 @@ function buscarEquipo(placaEscaneada) {
           fila: i + 1, 
           valores: data[i], 
           validaciones: validacionesGlobales,
+          validacionesIndices: validacionesIdx,
           mapeoSedeId: mapeoSedeId
         };
       }
