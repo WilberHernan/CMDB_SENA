@@ -134,6 +134,7 @@
   // Variables inyectadas por Apps Script al evaluar el template
   const QUERY_PARAMS = <?!= JSON.stringify(queryParams) ?>;
   const VALIDACIONES_GLOBALES = <?!= JSON.stringify(validaciones) ?>;
+  const MAPEO_SEDE_ID = <?!= JSON.stringify(mapeoSedeId) ?>;
 
   /* ================================================================
      THEME TOGGLE
@@ -488,6 +489,11 @@
 
     currentValidaciones = resultado.validaciones || {};
 
+    // Guardar propietario original para detectar cambios de hoja
+    window.propietarioOriginal = (resultado.valores[2] || '').toString().toUpperCase().trim();
+    inicializarObserverPropietario();
+    inicializarSincronizacionSede();
+
     for (let i = 0; i < 50; i++) {
       const el = document.getElementById('col_' + i);
       if (!el) continue;
@@ -528,6 +534,85 @@
     if (match) return match;
     match = opciones.find(opt => normalizeOption(opt).includes(normalizedValor) || normalizedValor.includes(normalizeOption(opt)));
     return match || null;
+  }
+
+  /* ================================================================
+     OBSERVER: Cambio de propietario -> Feedback visual de hoja destino
+     ================================================================ */
+  function inicializarObserverPropietario() {
+    const propietarioSelect = document.getElementById('col_2');
+    if (!propietarioSelect) return;
+
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-value') {
+          const nuevoPropietario = (propietarioSelect.dataset.value || '').toUpperCase();
+          const hojaActual = document.getElementById('hojaActual').value;
+          const hojaDestino = (nuevoPropietario === 'TELEFONICA') ? 'EquiposTelefonica' : 'EquiposSena';
+          const badge = document.getElementById('hojaBadge');
+
+          if (hojaDestino !== hojaActual && window.propietarioOriginal && nuevoPropietario !== window.propietarioOriginal) {
+            badge.innerText = `Se moverá a: ${hojaDestino}`;
+            badge.className = 'badge-meta blue';
+          } else {
+            badge.innerText = `${hojaActual} · Fila ${document.getElementById('filaActual').value}`;
+            badge.className = 'badge-meta accent';
+          }
+        }
+      });
+    });
+
+    observer.observe(propietarioSelect, { attributes: true });
+  }
+
+  /* ================================================================
+     SINCRONIZACIÓN: ID SEDE ↔ NOMBRE DE LA SEDE
+     ================================================================ */
+  function inicializarSincronizacionSede() {
+    const idSelect = document.getElementById('col_7');
+    const sedeSelect = document.getElementById('col_8');
+    if (!idSelect || !sedeSelect) return;
+
+    // Mapeo bidireccional inyectado desde el backend
+    const sedeAId = MAPEO_SEDE_ID && MAPEO_SEDE_ID.sedeAId ? MAPEO_SEDE_ID.sedeAId : {};
+    const idASede = MAPEO_SEDE_ID && MAPEO_SEDE_ID.idASede ? MAPEO_SEDE_ID.idASede : {};
+
+    // Cuando cambia NOMBRE DE LA SEDE → actualizar ID SEDE
+    const sedeObserver = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-value') {
+          const sede = (sedeSelect.dataset.value || '').toUpperCase();
+          if (sede && sedeAId[sede]) {
+            const idNuevo = sedeAId[sede];
+            // Solo actualizar si es diferente para evitar loops
+            if (idSelect.dataset.value !== idNuevo) {
+              populateSelect(idSelect, VALIDACIONES_GLOBALES[7] || [], idNuevo);
+              selectOption(idSelect, idNuevo);
+            }
+          }
+        }
+      });
+    });
+
+    // Cuando cambia ID SEDE → actualizar NOMBRE DE LA SEDE
+    const idObserver = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-value') {
+          const id = (idSelect.dataset.value || '').toString().trim();
+          if (id && idASede[id]) {
+            const sedeNueva = idASede[id];
+            // Solo actualizar si es diferente para evitar loops
+            if (sedeSelect.dataset.value !== sedeNueva) {
+              populateSelect(sedeSelect, VALIDACIONES_GLOBALES[8] || [], sedeNueva);
+              selectOption(sedeSelect, sedeNueva);
+            }
+          }
+        }
+      });
+    });
+
+    sedeObserver.observe(sedeSelect, { attributes: true });
+    idObserver.observe(idSelect, { attributes: true });
   }
 
   /* ================================================================
@@ -618,6 +703,8 @@
     if (btn) {
       btn.innerHTML = `${LUCIDE.plus}Registrar Nuevo Equipo`;
     }
+
+    inicializarSincronizacionSede();
 
     setTimeout(() => {
       formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });

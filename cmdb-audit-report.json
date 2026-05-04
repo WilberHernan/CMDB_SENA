@@ -1,6 +1,6 @@
 {
   "archivo": "CMDB CAUCA 2026.xlsx",
-  "fechaAuditoria": "30/4/2026, 12:32:19 a. m.",
+  "fechaAuditoria": "4/5/2026, 10:00:53 a. m.",
   "hojas": {
     "EquiposSena": {
       "totalFilas": 577,
@@ -3212,16 +3212,14 @@
         }
       ],
       "porSede": {
-        "CCYS": 142,
-        " ": 65,
+        "Sin sede": 181,
+        "CCYS": 127,
         "CUT": 39,
-        "GUAPI": 50,
+        "GUAPI": 4,
         "INEM": 124,
         "PAMBA": 23,
         "REGIONAL CAUCA": 39,
-        ":": 4,
-        "Sin sede": 4,
-        "TECNOPARQUE": 75,
+        "TECNOPARQUE": 28,
         "SENA GUAPI": 1,
         "SIGLO XXI": 11
       },
@@ -3483,10 +3481,9 @@
         }
       ],
       "porSede": {
-        ":": 6,
-        "GUAPI": 3,
+        "Sin sede": 12,
         "REGIONAL CAUCA": 55,
-        "CCYS": 53,
+        "CCYS": 50,
         "SAN JOSE": 12
       },
       "porEstado": {
