@@ -7,19 +7,19 @@ const HOJAS_EQUIPOS = ['EquiposSena', 'EquiposTelefonica'];
 const FORM_FIELDS = {
   "HOSTNAME": 0, "TIPO": 1, "PROPIETARIO": 2, "MARCA": 3, "MODELO": 4,
   "SERIAL": 5, "PLACA": 6, "ID SEDE": 7, "NOMBRE DE LA SEDE": 8,
-  "CIUDAD": 9, "UBICACIÓN": 10, "PISO": 11, "NOMBRE DEL USUARIO": 12,
-  "TIPO DE USUARIO": 13, "TIPO DE RED": 14, "PROCESADOR": 15,
-  "TIPO DISCO 1": 16, "TAMAÑO DISCO 1": 17, "TIPO DISCO 2": 18,
-  "TAMAÑO DISCO 2": 19, "TIPO MEMORIA": 20, "TAMAÑO MEMORIA": 21,
-  "TARJETA DE VIDEO": 22, "CAMBIO DE PARTE": 23, "CAMBIO DE PARTE 2": 24,
-  "# DE CASO PARA REPUESTO": 25, "PLACA MONITOR": 26, "PLACA MOUSE": 27,
-  "PLACA TECLADO": 28, "PLACA CARGADOR": 29, "MAC:RED CABLEADA": 30,
-  "MAC RED INALAMBRICA": 31, "SISTEMA OPERATIVO": 32, "VERSION DEL S.O.": 33,
-  "ANTIVIRUS": 34, "OFFICE": 35, "ADOBE": 36, "LAPS": 37, "7ZIP": 38,
-  "VPN": 39, "JAMF": 40, "OTRO SOFTWARE": 41, "ESTADO DEL EQUIPO": 42,
-  "TIENE DOMINIO": 43, "EN QUE DOMINIO SE ENCUENTRA": 44,
-  "CONTRASEÑA BIOS": 45, "FECHA ULTIMO MANTENIMIENTO": 46,
-  "FECHA IMPACTO MAQUINA": 47, "ASS": 48, "Observaciones": 49
+  "CIUDAD": 9, "UBICACIÓN": 10, "NOMBRE DE LA OFICINA O AMBIENTE": 11, "PISO": 12,
+  "NOMBRE DEL USUARIO": 13, "TIPO DE USUARIO": 14, "TIPO DE RED": 15, "PROCESADOR": 16,
+  "TIPO DISCO 1": 17, "TAMAÑO DISCO 1": 18, "TIPO DISCO 2": 19,
+  "TAMAÑO DISCO 2": 20, "TIPO MEMORIA": 21, "TAMAÑO MEMORIA": 22,
+  "TARJETA DE VIDEO": 23, "CAMBIO DE PARTE": 24, "CAMBIO DE PARTE 2": 25,
+  "# DE CASO PARA REPUESTO": 26, "PLACA MONITOR": 27, "PLACA MOUSE": 28,
+  "PLACA TECLADO": 29, "PLACA CARGADOR": 30, "MAC:RED CABLEADA": 31,
+  "MAC RED INALAMBRICA": 32, "SISTEMA OPERATIVO": 33, "VERSION DEL S.O.": 34,
+  "ANTIVIRUS": 35, "OFFICE": 36, "ADOBE": 37, "LAPS": 38, "7ZIP": 39,
+  "VPN": 40, "JAMF": 41, "OTRO SOFTWARE": 42, "ESTADO DEL EQUIPO": 43,
+  "TIENE DOMINIO": 44, "EN QUE DOMINIO SE ENCUENTRA": 45,
+  "CONTRASEÑA BIOS": 46, "FECHA ULTIMO MANTENIMIENTO": 47,
+  "FECHA IMPACTO MAQUINA": 48, "ASS": 49, "Observaciones": 50
 };
 
 const HEADER_ALIASES = {
@@ -47,13 +47,13 @@ const HEADER_ALIASES = {
 };
 
 const HARDCODED_VALIDATIONS = {
-  35: ["SI", "NO", "N/A"],
   36: ["SI", "NO", "N/A"],
   37: ["SI", "NO", "N/A"],
   38: ["SI", "NO", "N/A"],
   39: ["SI", "NO", "N/A"],
   40: ["SI", "NO", "N/A"],
-  45: ["SI", "NO", "N/A"]
+  41: ["SI", "NO", "N/A"],
+  46: ["SI", "NO", "N/A"]
 };
 
 function doGet(e) {
@@ -279,29 +279,29 @@ function obtenerValidacionesPorDefecto() {
   resultado[8] = ["REGIONAL", "CCYS", "GUAPI", "TECNOPARQUE", "SNFT", "ARCHIVO CENTRAL", "SAN JOSE", "LA PAMBA", "CIUDAD JARDIN"];
   resultado[9] = ["POPAYAN", "GUAPI"];
   resultado[10] = ["OFICINA", "AMBIENTE"];
-  resultado[11] = ["1", "2", "3"];
-  resultado[13] = ["ADMINISTRATIVO", "CONTRATISTA", "INSTRUCTOR", "APRENDIZ"];
-  resultado[14] = ["FUNCIONARIO", "FORMACION"];
-  resultado[16] = ["HDD", "SSD", "M2"];
-  resultado[17] = ["120 GB", "256 GB", "512 GB", "1 TB"];
-  resultado[18] = ["HDD", "SSD", "M2", "N/A"];
-  resultado[19] = ["120 GB", "256 GB", "512 GB", "1 TB", "N/A"];
-  resultado[20] = ["DDR3", "DDR4", "DDR5"];
-  resultado[21] = ["4 GB", "8 GB", "16 GB", "32 GB", "64 GB"];
-  resultado[32] = ["WINDOWS 10", "WINDOWS 11", "MAC OS MONTEREY", "MAC OS VENTURA"];
-  resultado[33] = ["20H2", "21H1", "21H2", "22H2", "23H2"];
-  resultado[34] = ["SI", "NO", "N/A"];
+  resultado[12] = ["1", "2", "3"];
+  resultado[14] = ["ADMINISTRATIVO", "CONTRATISTA", "INSTRUCTOR", "APRENDIZ"];
+  resultado[15] = ["FUNCIONARIO", "FORMACION"];
+  resultado[17] = ["HDD", "SSD", "M2"];
+  resultado[18] = ["120 GB", "256 GB", "512 GB", "1 TB"];
+  resultado[19] = ["HDD", "SSD", "M2", "N/A"];
+  resultado[20] = ["120 GB", "256 GB", "512 GB", "1 TB", "N/A"];
+  resultado[21] = ["DDR3", "DDR4", "DDR5"];
+  resultado[22] = ["4 GB", "8 GB", "16 GB", "32 GB", "64 GB"];
+  resultado[33] = ["WINDOWS 10", "WINDOWS 11", "MAC OS MONTEREY", "MAC OS VENTURA"];
+  resultado[34] = ["20H2", "21H1", "21H2", "22H2", "23H2"];
   resultado[35] = ["SI", "NO", "N/A"];
   resultado[36] = ["SI", "NO", "N/A"];
   resultado[37] = ["SI", "NO", "N/A"];
   resultado[38] = ["SI", "NO", "N/A"];
   resultado[39] = ["SI", "NO", "N/A"];
   resultado[40] = ["SI", "NO", "N/A"];
-  resultado[42] = ["OPERATIVO", "PRESENTA FALLA", "DAÑADO"];
-  resultado[43] = ["SI", "NO"];
-  resultado[44] = ["SENA.RED", "FORMACION.RED", "N/A"];
-  resultado[45] = ["SI", "NO", "N/A"];
-  resultado[48] = [
+  resultado[41] = ["SI", "NO", "N/A"];
+  resultado[43] = ["OPERATIVO", "PRESENTA FALLA", "DAÑADO"];
+  resultado[44] = ["SI", "NO"];
+  resultado[45] = ["SENA.RED", "FORMACION.RED", "N/A"];
+  resultado[46] = ["SI", "NO", "N/A"];
+  resultado[49] = [
     "ANDRES SEBASTIAN BRAVO PALACIOS",
     "JULIAN ANDRES NOGUERA BURGOS",
     "LEONARDO ANDRES GUITIERREZ NARVAEZ",
