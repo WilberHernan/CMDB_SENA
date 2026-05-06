@@ -21,7 +21,7 @@
 # ============================================
 # CONFIGURACION OBLIGATORIA
 # ============================================
-$script:CMDB_URL = "https://script.google.com/macros/s/AKfycbzvzsgmLr2SsZRBOwdJRRfePWkri5kUSBjTNBZhiJ7ffyhkZ97IC6-V7URWhXU84mHBpQ/exec"
+$script:CMDB_URL = "https://script.google.com/macros/s/AKfycbyomyEy0-69GmrZTxHQIcISBjB0QnO6JoSBEsRCer_egS5BNQtYDXLDYpgi_N1M5-tx/exec"
 
 if ($CMDB_URL -match "XXXXXXXX") {
     Write-Host ""

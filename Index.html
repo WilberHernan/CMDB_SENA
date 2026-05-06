@@ -208,6 +208,11 @@
     49: 'Asignación'
   };
 
+  const CAMPOS_PLACA = [6, 27, 28, 29, 30];
+  const ES_CAMPO_TEXTO = function(el) {
+    return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+  };
+
   const scannerInput = document.getElementById('scannerInput');
   const formContainer = document.getElementById('formContainer');
   const dynamicGrid = document.getElementById('dynamicGrid');
@@ -347,13 +352,15 @@
       iniciarModoNuevo(QUERY_PARAMS);
     }
 
-    // Sanitizar en tiempo real
+    // Sanitizar en tiempo real: apóstrofos -> guiones, TODO TEXTO -> MAYÚSCULAS
     dynamicGrid.addEventListener('input', function(e) {
       const target = e.target;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      if (ES_CAMPO_TEXTO(target)) {
         if (target.value.includes("'")) {
           target.value = target.value.replace(/'/g, '-');
         }
+        // Forzar mayúsculas en todos los campos de texto (inputs y textarea)
+        target.value = target.value.toUpperCase();
       }
     });
   });
@@ -504,7 +511,8 @@
         populateSelect(el, opciones, valor);
         selectOption(el, valor);
       } else {
-        el.value = valor;
+        // Forzar mayúsculas al cargar datos existentes
+        el.value = (valor || '').toString().toUpperCase();
       }
     }
 
@@ -634,7 +642,7 @@
     const defaultsNuevo = {
       18: 'N/A', 19: 'N/A', 23: 'N/A', 24: 'N/A',
       25: 'N/A', 26: 'N/A', 28: 'N/A', 44: 'N/A',
-      34: 'SI', 35: 'SI', 36: 'SI', 38: 'SI'
+      35: 'SI', 36: 'SI', 37: 'SI', 38: 'SI'
     };
 
     const mapeo = {
@@ -643,20 +651,20 @@
       4: params.modelo,
       5: params.serial,
       6: params.placa,
-      15: params.procesador,
-      16: params.disco1_tipo,
-      17: params.disco1_tam,
-      18: params.disco2_tipo,
-      19: params.disco2_tam,
-      20: params.tipo_memoria,
-      21: params.ram,
-      22: params.video,
-      30: params.mac_cableada,
-      31: params.mac_wifi,
-      32: params.so,
-      33: params.version_so,
-      46: params.fecha_mantenimiento,
-      47: params.fecha_impacto
+      16: params.procesador,
+      17: params.disco1_tipo,
+      18: params.disco1_tam,
+      19: params.disco2_tipo,
+      20: params.disco2_tam,
+      21: params.tipo_memoria,
+      22: params.ram,
+      23: params.video,
+      31: params.mac_cableada,
+      32: params.mac_wifi,
+      33: params.so,
+      34: params.version_so,
+      47: params.fecha_mantenimiento,
+      48: params.fecha_impacto
     };
 
     for (let i = 0; i < 51; i++) {
@@ -731,7 +739,7 @@
       }
 
       if (typeof valor === 'string') {
-        valor = valor.replace(/'/g, '-');
+        valor = valor.replace(/'/g, '-').toUpperCase();
       }
 
       valoresActualizados.push(valor);
