@@ -191,7 +191,9 @@
     "ANTIVIRUS", "OFFICE", "ADOBE", "LAPS", "7ZIP", "VPN", "JAMF",
     "OTRO SOFTWARE", "ESTADO DEL EQUIPO", "TIENE DOMINIO",
     "EN QUE DOMINIO SE ENCUENTRA", "CONTRASEÑA BIOS",
-    "FECHA ULTIMO MANTENIMIENTO", "FECHA IMPACTO MAQUINA", "ASS", "Observaciones"
+    "FECHA ULTIMO MANTENIMIENTO", "FECHA IMPACTO MAQUINA", "ASS", "Observaciones",
+    "RESPONSABLE DEL PRIMER MANTENIMIENTO ABRIL 2026",
+    "RESPONSABLE DEL SEGUNDO MANTENIMIENTO OCTUBRE 2026"
   ];
 
   const SECCIONES = {
@@ -205,12 +207,13 @@
     33: 'Software',
     43: 'Estado',
     46: 'Seguridad',
-    49: 'Asignación'
+    49: 'Asignación',
+    51: 'Responsables Mantenimiento'
   };
 
   const CAMPOS_PLACA = [6, 27, 28, 29, 30];
   const ES_CAMPO_TEXTO = function(el) {
-    return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+    return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.type !== 'date';
   };
 
   const scannerInput = document.getElementById('scannerInput');
@@ -298,6 +301,76 @@
   document.addEventListener('click', () => closeAllSelects(null));
 
   /* ================================================================
+     DATE FIELD (input de texto elegante + date picker nativo)
+     ================================================================ */
+  function createDateField(index) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'date-field';
+    wrapper.dataset.index = index;
+
+    const textInput = document.createElement('input');
+    textInput.type = 'text';
+    textInput.className = 'date-input-text';
+    textInput.placeholder = 'DD/MM/AAAA';
+    textInput.readOnly = true;
+
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.className = 'date-picker-hidden';
+
+    const icon = document.createElement('span');
+    icon.className = 'date-icon';
+    icon.innerHTML = LUCIDE.calendar;
+
+    wrapper.appendChild(textInput);
+    wrapper.appendChild(dateInput);
+    wrapper.appendChild(icon);
+
+    // Al hacer clic en cualquier parte, abrir el date picker nativo
+    wrapper.addEventListener('click', () => {
+      dateInput.showPicker ? dateInput.showPicker() : dateInput.click();
+    });
+
+    // Cuando se selecciona fecha, formatear y mostrar
+    dateInput.addEventListener('change', function() {
+      if (dateInput.value) {
+        const d = new Date(dateInput.value + 'T00:00:00');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        textInput.value = `${dd}/${mm}/${yyyy}`;
+      } else {
+        textInput.value = '';
+      }
+    });
+
+    return wrapper;
+  }
+
+  function setDateFieldValue(wrapper, rawValue) {
+    const textInput = wrapper.querySelector('.date-input-text');
+    const dateInput = wrapper.querySelector('.date-picker-hidden');
+    if (!textInput) return;
+
+    const str = (rawValue || '').toString().trim();
+
+    // SIEMPRE mostrar el valor original tal cual viene del sheet (como antes)
+    textInput.value = str;
+
+    // Intentar sincronizar el date picker interno para que si el usuario lo abre,
+    // muestre la fecha correcta. Si no se puede parsear, no pasa nada.
+    if (dateInput) {
+      const iso = formatearFechaParaInput(str);
+      if (iso) dateInput.value = iso;
+    }
+  }
+
+  function getDateFieldValue(wrapper) {
+    const textInput = wrapper.querySelector('.date-input-text');
+    return textInput ? (textInput.value || '') : '';
+  }
+
+  /* ================================================================
      GENERACIÓN DE CAMPOS CON SECCIONES
      ================================================================ */
   document.addEventListener('DOMContentLoaded', () => {
@@ -327,6 +400,8 @@
       } else if (nombre === "Observaciones") {
         input = document.createElement('textarea');
         input.rows = 3;
+      } else if (index === 47 || index === 48) {
+        input = createDateField(index);
       } else {
         input = document.createElement('input');
         input.type = 'text';
@@ -500,7 +575,7 @@
     inicializarObserverPropietario();
     inicializarSincronizacionSede();
 
-    for (let i = 0; i < 51; i++) {
+    for (let i = 0; i < 53; i++) {
       const el = document.getElementById('col_' + i);
       if (!el) continue;
 
@@ -510,6 +585,8 @@
         const opciones = currentValidaciones[i] || [];
         populateSelect(el, opciones, valor);
         selectOption(el, valor);
+      } else if (el.classList.contains('date-field')) {
+        setDateFieldValue(el, valor);
       } else {
         // Forzar mayúsculas al cargar datos existentes
         el.value = (valor || '').toString().toUpperCase();
@@ -522,6 +599,37 @@
     setTimeout(() => {
       formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 80);
+  }
+
+  /* ================================================================
+     UTILIDAD: Formatear fecha para input type="date" (YYYY-MM-DD)
+     ================================================================ */
+  function formatearFechaParaInput(valor) {
+    if (!valor || valor.toString().trim() === '') return '';
+    const str = valor.toString().trim();
+
+    // Ya está en formato ISO
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+
+    // Formato DD/MM/YYYY o D/M/YYYY (Latinoamérica)
+    const matchDMY = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (matchDMY) {
+      const dia = matchDMY[1].padStart(2, '0');
+      const mes = matchDMY[2].padStart(2, '0');
+      const anio = matchDMY[3];
+      return `${anio}-${mes}-${dia}`;
+    }
+
+    // Intentar parseo nativo
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    return '';
   }
 
   /* ================================================================
@@ -669,7 +777,7 @@
       48: params.fecha_impacto
     };
 
-    for (let i = 0; i < 51; i++) {
+    for (let i = 0; i < 53; i++) {
       const el = document.getElementById('col_' + i);
       if (!el) continue;
 
@@ -699,6 +807,8 @@
           } else {
             selectOption(el, '');
           }
+        } else if (el.classList.contains('date-field')) {
+          setDateFieldValue(el, valor);
         } else {
           el.value = valor;
         }
@@ -726,7 +836,7 @@
   function guardarCambios() {
     const valoresActualizados = [];
 
-    for (let i = 0; i < 51; i++) {
+    for (let i = 0; i < 53; i++) {
       const el = document.getElementById('col_' + i);
       if (!el) {
         valoresActualizados.push("");
@@ -736,6 +846,8 @@
       let valor;
       if (el.classList.contains('custom-select')) {
         valor = el.dataset.value || "";
+      } else if (el.classList.contains('date-field')) {
+        valor = getDateFieldValue(el);
       } else {
         valor = el.value;
       }

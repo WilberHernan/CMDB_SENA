@@ -801,8 +801,9 @@
   font-family: 'SF Mono', Monaco, monospace;
 }
 
-/* —— Inputs & Textarea —— */
+/* —— Inputs, Date & Textarea —— */
 input[type="text"],
+input[type="date"],
 textarea {
   padding: 12px 14px;
   font-size: 0.9375rem;
@@ -817,8 +818,10 @@ textarea {
   box-shadow: inset 2px 2px 4px var(--neu-shadow-dark), inset -2px -2px 4px var(--neu-shadow-light);
 }
 input[type="text"]:hover,
+input[type="date"]:hover,
 textarea:hover { border-color: var(--border-hover); }
 input[type="text"]:focus,
+input[type="date"]:focus,
 textarea:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-muted), inset 2px 2px 4px var(--neu-shadow-dark), inset -2px -2px 4px var(--neu-shadow-light);
@@ -836,6 +839,94 @@ textarea {
   resize: vertical;
   min-height: 90px;
   line-height: 1.6;
+}
+
+/* Date Field: input de texto elegante + date picker nativo */
+.date-field {
+  position: relative;
+  width: 100%;
+  border-radius: 14px;
+  padding: 1px;
+  background: var(--border-default);
+  transition: background 200ms ease, box-shadow 300ms ease;
+  cursor: pointer;
+}
+.date-field::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 15px;
+  background: linear-gradient(60deg, var(--accent), var(--sena-green-light), var(--accent));
+  background-size: 400% 400%;
+  animation: gradient-shift 6s ease infinite;
+  opacity: 0;
+  filter: blur(6px);
+  z-index: -1;
+  transition: opacity 300ms ease;
+}
+.date-field:hover {
+  background: var(--border-hover);
+}
+.date-field:hover::before {
+  opacity: 0.3;
+}
+.date-field:focus-within {
+  background: var(--border-accent);
+}
+.date-field:focus-within::before {
+  opacity: 0.4;
+}
+
+.date-input-text {
+  width: 100%;
+  padding: 12px 40px 12px 14px;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  border: none;
+  border-radius: 13px;
+  outline: none;
+  font-family: inherit;
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark), inset -3px -3px 6px var(--neu-shadow-light);
+  cursor: pointer;
+  text-align: left;
+}
+.date-input-text::placeholder {
+  color: var(--text-tertiary);
+}
+
+.date-picker-hidden {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.01;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: transparent;
+}
+
+.date-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 200ms ease;
+}
+.date-field:hover .date-icon,
+.date-field:focus-within .date-icon {
+  color: var(--accent);
+}
+.date-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
 }
 
 /* —— Custom Select —— */
